@@ -30,7 +30,7 @@ def register(request):
 
             #ACTIVAR USUARIO
             current_site = get_current_site(request)
-            mail_subject = 'pleace activate your account'
+            mail_subject = 'please activate your account'
             message = render_to_string('accounts/account_verification_email.html',{
                 'user': user,
                 'domain': current_site,
@@ -40,8 +40,8 @@ def register(request):
             to_email = email
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
-            messages.success(request, 'Registado correctamente.')
-            return redirect('register')
+            #messages.success(request, 'Gracias por registrarse con nosotros. Hemos enviado un correo de verificación a su correo electrónico. Por favor verifíquelo.')
+            return redirect('/accounts/login/?command=verification&email='+email)
     else:
         form = RegistrationForm()
     context = {
@@ -75,4 +75,18 @@ def logout(request):
 
 
 def activate(request, uidb64, token):
-    return HttpResponse('ok')
+    try:
+        uid=urlsafe_base64_decode(uidb64).decode()
+        user=Account._default_manager.get(pk=uid)
+    except(TypeError, ValueError,OverflowError, Account.DoesNotExist):
+        user=None
+
+    if user is not None and default_token_generator.check_token(user,token):
+        user.is_active=True
+        user.save()
+        messages.success(request,'Congratulations! Your account is activated.')
+        return redirect('login')
+    else:
+        messages.error(request,'Invalid activation link')
+        return redirect('register')
+
