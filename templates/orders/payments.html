@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<section class="section-content padding-y bg">
+<div class="container">
+
+<!-- ============================ COMPONENT 1 ================================= -->
+
+<div class="row">
+	<aside class="col-lg-8">
+        <div class="card">
+            <h5 class="card-header">Dirección de envio</h5>
+            <div class="card-body">
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            </div>
+        </div>
+        <div class="card">
+            <h5 class="card-header">Método de pago</h5>
+            <div class="card-body">
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            </div>
+        </div>
+        <div class="card">
+            <h5 class="card-header">Revisar productos</h5>
+            <div class="card-body">
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            </div>
+        </div>
+
+	</aside> <!-- col.// -->
+	<aside class="col-lg-4">
+
+		<div class="card">
+		<div class="card-body">
+			<dl class="dlist-align">
+			  <dt>Sub total:</dt>
+			  <dd class="text-right">Q {{ total }}</dd>
+			</dl>
+			<dl class="dlist-align">
+			  <dt>Impuestos:</dt>
+			  <dd class="text-right"> Q {{tax}}</dd>
+			</dl>
+			<dl class="dlist-align">
+			  <dt>Total a pagar:</dt>
+			  <dd class="text-right text-dark b"><strong>Q {{grand_total}}</strong></dd>
+			</dl>
+			<hr>
+			<p class="text-center mb-3">
+				<img src="{% static './images/misc/payments.png' %}" height="26">
+			</p>
+			<a href="{%url 'checkout'%}" class="btn btn-primary btn-block"> Realizar pago </a>
+		</div> <!-- card-body.// -->
+		</div> <!-- card.// -->
+
+</aside> <!-- col.// -->
+
+</div> <!-- row.// -->
+<!-- ============================ COMPONENT 1 END .// ================================= -->
+
+
+</div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock %}
