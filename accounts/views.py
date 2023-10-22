@@ -59,8 +59,8 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            # messages.success(request, 'You are now Logged in.')
-            return redirect('home')
+            messages.success(request, 'Ahora estás logueado.')
+            return redirect('dashboard')
         else:
             messages.error(request, 'Datos incorrectos')
             return redirect('login')
@@ -70,7 +70,7 @@ def login(request):
 @login_required(login_url = 'login')
 def logout(request):
     auth.logout(request)
-    messages.success(request, 'Estas logueado.')
+    messages.success(request, 'Cerraste sesión.')
     return redirect('login')
 
 
@@ -90,3 +90,6 @@ def activate(request, uidb64, token):
         messages.error(request,'Invalid activation link')
         return redirect('register')
 
+@login_required(login_url='login')
+def dashboard(request):
+    return render(request,'accounts/dashboard.html')
