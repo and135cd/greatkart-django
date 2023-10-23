@@ -10,6 +10,21 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 def payments(request):
+    body=json.loads(request.body)
+    order=Order.objects.get(user=request.user,is_ordered=False,order_number=body['orderID'])
+    #guardar los detalles de la transaccion dentro del modelo de Payment
+    payment=Payment(
+        user=request.user,
+        payment_id=body['transID'],
+        payment_method=body['payment_method'],
+        amount_paid=order.order_total,
+        status=body['status'],
+    )
+    payment.save()
+
+    order.payment=payment
+    order.is_ordered=True
+    order.save()
     return render(request,'orders/payments.html')
 
 def place_order(request, total=0, quantity=0):
@@ -28,7 +43,6 @@ def place_order(request, total=0, quantity=0):
         quantity += cart_item.quantity
     tax = (total*0.12)
     grand_total = total
-
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -59,6 +73,7 @@ def place_order(request, total=0, quantity=0):
             data.order_number = order_number
             data.save()
 
+            
             order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
             context = {
                 'order': order,
