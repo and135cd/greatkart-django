@@ -89,15 +89,15 @@
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Sub total:</dt>
-			  <dd class="text-right">$ {{ total }}</dd>
+			  <dd class="text-right">Q {{ total }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Impuestos:</dt>
-			  <dd class="text-right"> $ {{tax}}</dd>
+			  <dd class="text-right"> Q {{tax}}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Total a pagar:</dt>
-			  <dd class="text-right text-dark b"><strong>$ {{grand_total}}</strong></dd>
+			  <dd class="text-right text-dark b"><strong>Q {{grand_total}}</strong></dd>
 			</dl>
 			<hr>
 			<p class="text-center mb-3">
@@ -130,29 +130,30 @@
 <script>
 
 	function getCookie(name) {
-		let cookieValue = null;
-		if (document.cookie && document.cookie !== '') {
-			const cookies = document.cookie.split(';');
-			for (let i = 0; i < cookies.length; i++) {
-				const cookie = cookies[i].trim();
-				// Does this cookie string begin with the name we want?
-				if (cookie.substring(0, name.length + 1) === (name + '=')) {
-					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-					break;
-				}
-			}
-		}
-		return cookieValue;
-	}
-	
-	var amount = "{{grand_total}}"
-	var url="{%url 'payments'%}"
-	var csrftoken=getCookie('csrftoken');
-	var orderID="{{order.order_number}}"
-	var payment_method='PayPal'
-	
-	//Render
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+	var amount = "{{ grand_total }}"
+	var url = "{% url 'payments' %}"
+	var csrftoken = getCookie('csrftoken');
+	var orderID = "{{order.order_number}}"
+	var payment_method = 'PayPal'
+	var redirect_url = "{% url 'order_complete' %}"
+	// Render the PayPal button into #paypal-button-container
 	paypal.Buttons({
+
 		style: {
 			color: 'blue',
 			shape: 'rect',
@@ -160,39 +161,41 @@
 			height: 40
 		},
 
-		//set up the transaction
-		createOrder:function(date,actions){
+		// Set up the transaction
+		createOrder: function(data, actions) {
 			return actions.order.create({
-				purchase_units:[{
-					amount:{
-						value:amount
+				purchase_units: [{
+					amount: {
+						value: amount,
 					}
 				}]
 			});
 		},
 
-		//finalizar la transaccion
-		onApprove:function(data,actions){
-			return actions.order.capture().then(function(details){
-				//show
+		// Finalize the transaction
+		onApprove: function(data, actions) {
+			return actions.order.capture().then(function(details) {
+				// Show a success message to the buyer
 				console.log(details);
 				sendData();
 				function sendData(){
-					fetch(url,{
-						method:'POST',
-						headers:{
-							"Content-type":'application/json',
-							"X-CSRFToken": csrftoken
+					fetch(url, {
+						method : "POST",
+						headers: {
+							"Content-type": "application/json",
+							"X-CSRFToken": csrftoken,
 						},
-						body:JSON.stringify({
-							orderID:orderID,
+						body: JSON.stringify({
+							orderID: orderID,
 							transID: details.id,
-							payment_method:payment_method,
+							payment_method: payment_method,
 							status: details.status,
 						}),
 					})
-					//.then(response => response.json())
-					//.then(data => console.log(data))
+				  .then((response) => response.json())
+				  .then((data) => {
+						window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
+					});
 				}
 			});
 		}
@@ -200,4 +203,5 @@
 
 	}).render('#paypal-button-container');
 </script>
+
 {% endblock %}
